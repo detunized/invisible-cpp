@@ -1,1 +1,4 @@
+*.autosave
+*.user
+build/
 invisible-cpp

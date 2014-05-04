@@ -1,6 +1,7 @@
 #include "stacktrace.h"
 
 #include <array>
+#include <vector>
 #include <stdio.h>
 #include <stdlib.h>
 #include <execinfo.h>
@@ -22,8 +23,8 @@ void print_stack_trace()
    backtrace_symbols_fd(addresses.data(), addrlen, fileno(stderr));
 }
 
-void install_stack_trace_printer(std::vector<int> const &signals)
+void install_stack_trace_printer(std::vector<int> const &signums)
 {
-   for (auto i: signals)
+   for (auto i: signums)
       signal(i, print_stack_trace_on_signal);
 }
