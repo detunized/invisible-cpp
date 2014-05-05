@@ -31,6 +31,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 # Add executable with the settings prepared above
 #
 add_executable(${PROJECT_NAME} main.cpp
+                               action.cpp
+                               consumer.cpp
                                stacktrace.cpp)
 
 # LLVM libraries (use llvm-config)
