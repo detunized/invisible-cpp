@@ -1,66 +1,80 @@
 project(invisible-cpp)
 cmake_minimum_required(VERSION 2.8)
 
-# Path to LLVM
-set(LLVM_ROOT "${CMAKE_CURRENT_LIST_DIR}/../llvm/build" CACHE PATH "Root of LLVM install/build")
-if(NOT EXISTS ${LLVM_ROOT}/include/llvm)
-    message(FATAL_ERROR "LLVM_ROOT (${LLVM_ROOT}) is not a valid LLVM install")
+# Path to LLVM build/install root relative to CMakeLists.txt
+set(LLVM_ROOT "../llvm/build")
+
+# Path to llvm-config
+set(LLVM_CONFIG "${CMAKE_CURRENT_LIST_DIR}/${LLVM_ROOT}/bin/llvm-config")
+if(NOT EXISTS "${LLVM_CONFIG}")
+    message(FATAL_ERROR "llvm-config (${LLVM_CONFIG}) could not be found")
 endif()
 
-# Load LLVM CMake config
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${LLVM_ROOT}/share/llvm/cmake")
-include(LLVMConfig)
+execute_process(COMMAND "${LLVM_CONFIG}" "--src-root"
+                OUTPUT_VARIABLE LLVM_SRC_ROOT
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+execute_process(COMMAND "${LLVM_CONFIG}" "--obj-root"
+                OUTPUT_VARIABLE LLVM_OBJ_ROOT
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+execute_process(COMMAND "${LLVM_CONFIG}" "--cxxflags"
+                OUTPUT_VARIABLE LLVM_CXX_FLAGS
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+execute_process(COMMAND "${LLVM_CONFIG}" "--libdir"
+                OUTPUT_VARIABLE LLVM_LIB_DIR
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+execute_process(COMMAND "${LLVM_CONFIG}" "--libs"
+                OUTPUT_VARIABLE LLVM_LIBS
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 # LLVM compiler/linker settings
-add_definitions(${LLVM_DEFINITIONS})
-include_directories(${LLVM_INCLUDE_DIRS})
-link_directories(${LLVM_LIBRARY_DIRS})
+add_definitions("${LLVM_CXX_FLAGS}")
+link_directories("${LLVM_LIB_DIR}")
 
 # Clang include directories
-include_directories("${LLVM_BUILD_MAIN_SRC_DIR}/tools/clang/include"
-                    "${LLVM_BUILD_BINARY_DIR}/tools/clang/include")
-
+include_directories("${LLVM_SRC_ROOT}/tools/clang/include"
+                    "${LLVM_OBJ_ROOT}/tools/clang/include")
 
 # We want C++11
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
 
-# Clang don't like RTTI
+# Clang doesn't like RTTI
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 
 #
 # Add executable with the settings prepared above
 #
-add_executable(${PROJECT_NAME} main.cpp
-                               action.cpp
-                               consumer.cpp
-                               stacktrace.cpp)
+add_executable("${PROJECT_NAME}" "main.cpp"
+                                 "action.cpp"
+                                 "consumer.cpp"
+                                 "stacktrace.cpp")
 
-# LLVM libraries (use llvm-config)
-execute_process(COMMAND ${LLVM_BUILD_TOOLS_BINARY_DIR}/llvm-config --libs
-                OUTPUT_VARIABLE REQUIRED_LLVM_LIBRARIES
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-target_link_libraries(${PROJECT_NAME} ${REQUIRED_LLVM_LIBRARIES})
+# LLVM libraries
+target_link_libraries("${PROJECT_NAME}" "${LLVM_LIBS}")
 
 # Clang libraries
-target_link_libraries(${PROJECT_NAME} clangAnalysis
-                                      clangAST
-                                      clangASTMatchers
-                                      clangBasic
-                                      clangDriver
-                                      clangDynamicASTMatchers
-                                      clangEdit
-                                      clangFormat
-                                      clangFrontend
-                                      clangFrontendTool
-                                      clangIndex
-                                      clangLex
-                                      clangParse
-                                      clangRewriteCore
-                                      clangRewriteFrontend
-                                      clangSema
-                                      clangSerialization
-                                      clangTooling)
+target_link_libraries("${PROJECT_NAME}" "clangAnalysis"
+                                        "clangAST"
+                                        "clangASTMatchers"
+                                        "clangBasic"
+                                        "clangDriver"
+                                        "clangDynamicASTMatchers"
+                                        "clangEdit"
+                                        "clangFormat"
+                                        "clangFrontend"
+                                        "clangFrontendTool"
+                                        "clangIndex"
+                                        "clangLex"
+                                        "clangParse"
+                                        "clangRewriteCore"
+                                        "clangRewriteFrontend"
+                                        "clangSema"
+                                        "clangSerialization"
+                                        "clangTooling")
 
-# Extra libraries
-target_link_libraries(${PROJECT_NAME} ncurses
-                                      z)
+# Extra libraries needed by LLVM/Clang
+target_link_libraries("${PROJECT_NAME}" "ncurses"
+                                        "z")
