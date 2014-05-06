@@ -10,25 +10,18 @@ if(NOT EXISTS "${LLVM_CONFIG}")
     message(FATAL_ERROR "llvm-config (${LLVM_CONFIG}) could not be found")
 endif()
 
-execute_process(COMMAND "${LLVM_CONFIG}" "--src-root"
-                OUTPUT_VARIABLE LLVM_SRC_ROOT
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
+# Run llvm-config to get various build parameters
+macro(llvm_config command result_var)
+    execute_process(COMMAND "${LLVM_CONFIG}" "${command}"
+                    OUTPUT_VARIABLE "${result_var}"
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+endmacro()
 
-execute_process(COMMAND "${LLVM_CONFIG}" "--obj-root"
-                OUTPUT_VARIABLE LLVM_OBJ_ROOT
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-execute_process(COMMAND "${LLVM_CONFIG}" "--cxxflags"
-                OUTPUT_VARIABLE LLVM_CXX_FLAGS
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-execute_process(COMMAND "${LLVM_CONFIG}" "--libdir"
-                OUTPUT_VARIABLE LLVM_LIB_DIR
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-execute_process(COMMAND "${LLVM_CONFIG}" "--libs"
-                OUTPUT_VARIABLE LLVM_LIBS
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
+llvm_config("--src-root" LLVM_SRC_ROOT)
+llvm_config("--obj-root" LLVM_OBJ_ROOT)
+llvm_config("--cxxflags" LLVM_CXX_FLAGS)
+llvm_config("--libdir" LLVM_LIB_DIR)
+llvm_config("--libs" LLVM_LIBS)
 
 # LLVM compiler/linker settings
 add_definitions("${LLVM_CXX_FLAGS}")
