@@ -3,6 +3,8 @@
 #include "utils.h"
 #include "stacktrace.h"
 
+#include <signal.h>
+
 #include <clang/Basic/FileManager.h>
 #include <clang/Tooling/Tooling.h>
 
