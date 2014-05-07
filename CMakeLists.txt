@@ -32,10 +32,16 @@ include_directories("${LLVM_SRC_ROOT}/tools/clang/include"
                     "${LLVM_OBJ_ROOT}/tools/clang/include")
 
 # We want C++11
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+if (APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+endif()
 
 # Clang doesn't like RTTI
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+add_definitions("-fno-rtti")
+
+# Mute warnings produced by GCC 4.8 on LLVM/Clang headers
+add_definitions("-Wno-strict-aliasing")
 
 #
 # Add executable with the settings prepared above
@@ -45,29 +51,36 @@ add_executable("${PROJECT_NAME}" "main.cpp"
                                  "consumer.cpp"
                                  "stacktrace.cpp")
 
+# Clang libraries
+target_link_libraries("${PROJECT_NAME}" "clangIndex"
+                                        "clangFormat"
+                                        "clangTooling"
+                                        "clangFrontendTool"
+                                        "clangStaticAnalyzerFrontend"
+                                        "clangRewriteFrontend"
+                                        "clangCodeGen"
+                                        "clangARCMigrate"
+                                        "clangStaticAnalyzerCheckers"
+                                        "clangStaticAnalyzerCore"
+                                        "clangRewriteCore"
+                                        "clangFrontend"
+                                        "clangSerialization"
+                                        "clangParse"
+                                        "clangSema"
+                                        "clangEdit"
+                                        "clangAnalysis"
+                                        "clangDriver"
+                                        "clangDynamicASTMatchers"
+                                        "clangASTMatchers"
+                                        "clangAST"
+                                        "clangLex"
+                                        "clangBasic")
+
 # LLVM libraries
 target_link_libraries("${PROJECT_NAME}" "${LLVM_LIBS}")
 
-# Clang libraries
-target_link_libraries("${PROJECT_NAME}" "clangAnalysis"
-                                        "clangAST"
-                                        "clangASTMatchers"
-                                        "clangBasic"
-                                        "clangDriver"
-                                        "clangDynamicASTMatchers"
-                                        "clangEdit"
-                                        "clangFormat"
-                                        "clangFrontend"
-                                        "clangFrontendTool"
-                                        "clangIndex"
-                                        "clangLex"
-                                        "clangParse"
-                                        "clangRewriteCore"
-                                        "clangRewriteFrontend"
-                                        "clangSema"
-                                        "clangSerialization"
-                                        "clangTooling")
-
 # Extra libraries needed by LLVM/Clang
-target_link_libraries("${PROJECT_NAME}" "ncurses"
+target_link_libraries("${PROJECT_NAME}" "dl"
+                                        "ncurses"
+                                        "pthread"
                                         "z")
