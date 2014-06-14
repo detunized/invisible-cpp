@@ -8,5 +8,5 @@ using namespace clang;
 
 ASTConsumer *Action::CreateASTConsumer(CompilerInstance &CI, StringRef InFile)
 {
-    return new Consumer();
+    return new Consumer(CI);
 }
