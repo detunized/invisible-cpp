@@ -46,10 +46,14 @@ add_definitions("-Wno-strict-aliasing")
 #
 # Add executable with the settings prepared above
 #
-add_executable("${PROJECT_NAME}" "main.cpp"
-                                 "action.cpp"
+add_executable("${PROJECT_NAME}" "action.cpp"
+                                 "action.h"
                                  "consumer.cpp"
-                                 "stacktrace.cpp")
+                                 "consumer.h"
+                                 "main.cpp"
+                                 "stacktrace.cpp"
+                                 "stacktrace.h"
+                                 "utils.h")
 
 # Clang libraries
 target_link_libraries("${PROJECT_NAME}" "clangIndex"
