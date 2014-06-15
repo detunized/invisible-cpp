@@ -22,6 +22,27 @@ void write_to_file(RewriteBuffer const &buffer, std::string const &filename)
         file << c;
 }
 
+std::string pad(int indent)
+{
+    return std::string(indent * 2, ' ');
+}
+
+void print_declaration(Decl const *d, int indent = 0)
+{
+    std::cout << pad(indent) << "D:" << (d ? d->getDeclKindName() : "null");
+    if (auto const nd = dyn_cast<clang::NamedDecl>(d))
+        std::cout << " " << nd->getNameAsString();
+    std::cout << std::endl;
+
+    if (auto const body = d->getBody())
+        std::cout << pad(indent + 1) << "body: " << body << std::endl;
+
+    // Declaration context
+    if (auto const dc = dyn_cast<clang::DeclContext>(d))
+        for (auto &&i: dc->decls())
+            print_declaration(i, indent + 1);
+}
+
 }
 
 void Consumer::Initialize(ASTContext &context)
@@ -42,6 +63,11 @@ void Consumer::HandleTranslationUnit(ASTContext &context)
     html::EscapeText(rewriter_, file_id, false, true);
 
     write_to_file(rewriter_.getEditBuffer(file_id), filename + ".html");
+
+    auto const tu = context.getTranslationUnitDecl();
+    print_declaration(tu);
+
+    tu->dump(llvm::outs());
 }
 
 void Consumer::InitializeSema(Sema &S)
@@ -56,25 +82,21 @@ void Consumer::ForgetSema()
 
 bool Consumer::HandleTopLevelDecl(DeclGroupRef D)
 {
-    std::cout << "TopLevelDecl:\n";
-    for (auto const &i: D)
-        i->dump();
-
     return true;
 }
 
 void Consumer::HandleTagDeclDefinition(TagDecl *D)
 {
-    std::cout << "TagDeclDefinition:\n";
-    D->dump();
+//    std::cout << "TagDeclDefinition:\n";
+//    D->dump(llvm::outs());
 
-    if (auto record = llvm::dyn_cast<clang::CXXRecordDecl>(D))
-    {
-        // Add default ctor
-        if (record->needsImplicitDefaultConstructor())
-        {
-            auto ctor = sema_->DeclareImplicitDefaultConstructor(record);
-            sema_->DefineImplicitDefaultConstructor(record->getLocation(), ctor);
-        }
-    }
+//    if (auto record = llvm::dyn_cast<clang::CXXRecordDecl>(D))
+//    {
+//        // Add default ctor
+//        if (record->needsImplicitDefaultConstructor())
+//        {
+//            auto ctor = sema_->DeclareImplicitDefaultConstructor(record);
+//            sema_->DefineImplicitDefaultConstructor(record->getLocation(), ctor);
+//        }
+//    }
 }
