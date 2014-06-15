@@ -30,7 +30,7 @@ std::string pad(int indent)
 void print_declaration(Decl const *d, int indent = 0)
 {
     std::cout << pad(indent) << "D:" << (d ? d->getDeclKindName() : "null");
-    if (auto const nd = dyn_cast<clang::NamedDecl>(d))
+    if (auto const nd = dyn_cast<NamedDecl>(d))
         std::cout << " " << nd->getNameAsString();
     std::cout << std::endl;
 
@@ -38,7 +38,7 @@ void print_declaration(Decl const *d, int indent = 0)
         std::cout << pad(indent + 1) << "body: " << body << std::endl;
 
     // Declaration context
-    if (auto const dc = dyn_cast<clang::DeclContext>(d))
+    if (auto const dc = dyn_cast<DeclContext>(d))
         for (auto &&i: dc->decls())
             print_declaration(i, indent + 1);
 }
@@ -67,7 +67,7 @@ void Consumer::HandleTranslationUnit(ASTContext &context)
     auto const tu = context.getTranslationUnitDecl();
     print_declaration(tu);
 
-    tu->dump(llvm::outs());
+    tu->dump(outs());
 }
 
 void Consumer::InitializeSema(Sema &S)
@@ -88,9 +88,9 @@ bool Consumer::HandleTopLevelDecl(DeclGroupRef D)
 void Consumer::HandleTagDeclDefinition(TagDecl *D)
 {
 //    std::cout << "TagDeclDefinition:\n";
-//    D->dump(llvm::outs());
+//    D->dump(outs());
 
-//    if (auto record = llvm::dyn_cast<clang::CXXRecordDecl>(D))
+//    if (auto record = dyn_cast<CXXRecordDecl>(D))
 //    {
 //        // Add default ctor
 //        if (record->needsImplicitDefaultConstructor())
