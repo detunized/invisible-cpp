@@ -27,15 +27,34 @@ std::string pad(int indent)
     return std::string(indent * 2, ' ');
 }
 
-void print_declaration(Decl const *d, int indent = 0)
+void print_statement(Stmt const *s, int indent = 0);
+void print_declaration(Decl const *d, int indent = 0);
+
+void print_statement(Stmt const *s, int indent)
 {
-    std::cout << pad(indent) << "D:" << (d ? d->getDeclKindName() : "null");
+    assert(s);
+
+    std::cout << pad(indent) << "S: " << s->getStmtClassName() << std::endl;
+
+    if (auto const ds = dyn_cast<DeclStmt>(s))
+        for (auto &&i: ds->decls())
+            print_declaration(i, indent + 1);
+
+    for (auto &&i: s->children())
+        print_statement(i, indent + 1);
+}
+
+void print_declaration(Decl const *d, int indent)
+{
+    assert(d);
+
+    std::cout << pad(indent) << "D: " << d->getDeclKindName();
     if (auto const nd = dyn_cast<NamedDecl>(d))
         std::cout << " " << nd->getNameAsString();
     std::cout << std::endl;
 
     if (auto const body = d->getBody())
-        std::cout << pad(indent + 1) << "body: " << body << std::endl;
+        print_statement(body, indent);
 
     // Declaration context
     if (auto const dc = dyn_cast<DeclContext>(d))
