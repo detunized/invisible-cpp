@@ -1,4 +1,6 @@
 #include "consumer.h"
+#include "visitor.h"
+
 #include <fstream>
 #include <iostream>
 
@@ -84,9 +86,12 @@ void Consumer::HandleTranslationUnit(ASTContext &context)
     write_to_file(rewriter_.getEditBuffer(file_id), filename + ".html");
 
     auto const tu = context.getTranslationUnitDecl();
-    print_declaration(tu);
 
-    tu->dump(outs());
+    Visitor v(context);
+    v.TraverseDecl(tu);
+
+    //print_declaration(tu);
+    //tu->dump(outs());
 }
 
 void Consumer::InitializeSema(Sema &S)

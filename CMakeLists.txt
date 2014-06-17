@@ -53,7 +53,9 @@ add_executable("${PROJECT_NAME}" "action.cpp"
                                  "main.cpp"
                                  "stacktrace.cpp"
                                  "stacktrace.h"
-                                 "utils.h")
+                                 "utils.h"
+                                 "visitor.cpp"
+                                 "visitor.h")
 
 # Clang libraries
 target_link_libraries("${PROJECT_NAME}" "clangIndex"
