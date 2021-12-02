@@ -78,17 +78,18 @@ void Consumer::HandleTranslationUnit(ASTContext &context)
     auto const file_entry = source_manager.getFileEntryForID(file_id);
     std::string filename = file_entry == nullptr ? "untitled" : file_entry->getName();
 
-    html::AddLineNumbers(rewriter_, file_id);
-    html::AddHeaderFooterInternalBuiltinCSS(rewriter_, file_id, filename.c_str());
-    html::SyntaxHighlight(rewriter_, file_id, compiler_.getPreprocessor());
-    html::EscapeText(rewriter_, file_id, false, true);
-
-    write_to_file(rewriter_.getEditBuffer(file_id), filename + ".html");
+    //html::AddLineNumbers(rewriter_, file_id);
+    //html::AddHeaderFooterInternalBuiltinCSS(rewriter_, file_id, filename.c_str());
+    //html::SyntaxHighlight(rewriter_, file_id, compiler_.getPreprocessor());
 
     auto const tu = context.getTranslationUnitDecl();
-
-    Visitor v(context);
+    Visitor v(context, rewriter_);
     v.TraverseDecl(tu);
+
+    //html::AddLineNumbers(rewriter_, file_id);
+    //html::AddHeaderFooterInternalBuiltinCSS(rewriter_, file_id, filename.c_str());
+
+    write_to_file(rewriter_.getEditBuffer(file_id), filename + ".out.cpp");
 
     //print_declaration(tu);
     //tu->dump(outs());
